@@ -268,6 +268,7 @@ function stopRec(){
   stopTimer();stopWave();
   document.getElementById('rbtn').classList.remove('rec');
   document.getElementById('rtxt').textContent='Start Recording';
+  setTimeout(()=>{if(S.utts.length>0)document.getElementById('abtn').disabled=false;},1000);
 }
 
 // Upload
