@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Speech Track — Sign In</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Inter',sans-serif;background:#EEF2F5;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:20px;}
+.card{background:white;border-radius:18px;box-shadow:0 4px 24px rgba(26,74,92,0.12);width:100%;max-width:420px;overflow:hidden;}
+.card-header{background:#1A4A5C;padding:32px 36px 28px;text-align:center;}
+.logo{display:inline-flex;align-items:center;gap:10px;margin-bottom:16px;}
+.logo-icon{width:36px;height:36px;background:rgba(255,255,255,0.15);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:20px;}
+.logo-text{font-size:20px;font-weight:700;color:white;}
+.card-title{font-size:15px;color:rgba(255,255,255,0.8);}
+.hipaa{display:inline-flex;align-items:center;gap:5px;margin-top:12px;padding:4px 11px;background:rgba(184,134,11,0.25);border:1px solid rgba(184,134,11,0.5);border-radius:20px;font-size:11px;font-weight:600;color:#F5D060;}
+.card-body{padding:32px 36px;}
+.server-box{background:#F0F4F7;border-radius:10px;padding:14px 16px;margin-bottom:20px;border:1px solid #D4E0E8;}
+.server-label{font-size:11px;font-weight:600;color:#4A6172;margin-bottom:6px;display:flex;justify-content:space-between;}
+.server-input{width:100%;padding:7px 10px;border:1px solid #D4E0E8;border-radius:6px;font-family:'Inter',sans-serif;font-size:12px;outline:none;}
+.server-status{display:flex;align-items:center;gap:6px;margin-top:6px;font-size:11px;color:#7A96A8;}
+.dot{width:7px;height:7px;border-radius:50%;}
+.dot.green{background:#4A8C7A;}.dot.red{background:#C94040;}.dot.amber{background:#E8943A;}
+.error{display:none;background:#FFF0F0;border:1px solid rgba(201,64,64,0.25);border-radius:8px;padding:10px 13px;font-size:13px;color:#C94040;margin-bottom:16px;align-items:center;gap:7px;}
+.error.show{display:flex;}
+label{display:block;font-size:12px;font-weight:600;color:#4A6172;margin-bottom:6px;}
+input[type=email],input[type=password]{width:100%;padding:11px 14px;border:1.5px solid #D4E0E8;border-radius:9px;font-family:'Inter',sans-serif;font-size:14px;outline:none;background:#EEF2F5;margin-bottom:16px;}
+input:focus{border-color:#4A9AB8;background:white;}
+.pw-wrap{position:relative;margin-bottom:16px;}
+.pw-wrap input{margin-bottom:0;padding-right:46px;width:100%;}
+.show-pw{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:16px;}
+.btn{width:100%;padding:13px;border-radius:10px;border:none;cursor:pointer;font-family:'Inter',sans-serif;font-size:15px;font-weight:600;background:#1A4A5C;color:white;display:flex;align-items:center;justify-content:center;gap:8px;}
+.btn:hover{background:#2A6A82;}
+.btn:disabled{opacity:.6;cursor:not-allowed;}
+.spinner{width:16px;height:16px;border-radius:50%;border:2.5px solid rgba(255,255,255,0.35);border-top-color:white;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.card-footer{padding:16px 36px 24px;border-top:1px solid #D4E0E8;text-align:center;display:flex;justify-content:center;gap:20px;}
+.sec{font-size:11px;color:#7A96A8;}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="card-header">
+    <div class="logo"><div class="logo-icon">🎙️</div><span class="logo-text">Speech Track</span></div>
+    <div class="card-title">Intelligibility Assessment Platform</div>
+    <div class="hipaa">🔒 HIPAA-Aware Clinical Tool</div>
+  </div>
+  <div class="card-body">
+    <div class="server-box">
+      <div class="server-label"><span>Backend Server</span><span id="sLabel" style="color:#7A96A8">Checking...</span></div>
+      <input class="server-input" id="serverUrl" type="url" value="https://speechtrack-server-production.up.railway.app" oninput="onUrlChange()"/>
+      <div class="server-status"><div class="dot amber" id="sDot"></div><span id="sMsg">Connecting...</span></div>
+    </div>
+    <div class="error" id="errBox"><span>⚠️</span><span id="errText">Invalid email or password.</span></div>
+    <form onsubmit="doLogin(event)">
+      <label>Work Email</label>
+      <input type="email" id="email" placeholder="you@organization.com" required/>
+      <label>Password</label>
+      <div class="pw-wrap"><input type="password" id="password" placeholder="••••••••••••" required/><button type="button" class="show-pw" onclick="togglePw()">👁</button></div>
+      <button type="submit" class="btn" id="loginBtn">Sign In</button>
+    </form>
+  </div>
+  <div class="card-footer">
+    <span class="sec">🔒 TLS Encrypted</span>
+    <span class="sec">📋 Audit Logged</span>
+    <span class="sec">⏱ 8-Hour Sessions</span>
+  </div>
+</div>
+<script>
+const APP='./speechtrack_v2.html';
+let serverUrl='https://speechtrack-server-production.up.railway.app';
+let checkTimer;
+async function checkServer(url){
+  try{
+    const r=await fetch(url+'/health',{signal:AbortSignal.timeout(6000)});
+    const d=await r.json();
+    setStatus('green','Connected · BAA: '+(d.baaConfirmed?'✓':'⚠'),'Connected');
+  }catch(e){setStatus('red','Cannot reach server','Unreachable');}
+}
+function setStatus(color,msg,label){
+  document.getElementById('sDot').className='dot '+color;
+  document.getElementById('sMsg').textContent=msg;
+  const l=document.getElementById('sLabel');
+  l.textContent=label;
+  l.style.color=color==='green'?'#4A8C7A':color==='red'?'#C94040':'#7A96A8';
+}
+function onUrlChange(){
+  clearTimeout(checkTimer);
+  serverUrl=document.getElementById('serverUrl').value.trim();
+  setStatus('amber','Checking...','Checking...');
+  checkTimer=setTimeout(()=>checkServer(serverUrl),800);
+}
+async function doLogin(e){
+  e.preventDefault();
+  document.getElementById('errBox').classList.remove('show');
+  const btn=document.getElementById('loginBtn');
+  btn.disabled=true;
+  btn.innerHTML='<div class="spinner"></div> Signing in...';
+  try{
+    const r=await fetch(serverUrl+'/auth/login',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({email:document.getElementById('email').value.trim(),password:document.getElementById('password').value}),
+    });
+    const d=await r.json();
+    if(!r.ok){showErr(d.error||'Login failed');btn.disabled=false;btn.innerHTML='Sign In';return;}
+    sessionStorage.setItem('st_token',d.token);
+    sessionStorage.setItem('st_user',JSON.stringify(d.user));
+    sessionStorage.setItem('st_server_url',serverUrl);
+    sessionStorage.setItem('st_token_exp',String(Date.now()+d.expiresIn*1000));
+    window.location.href=APP;
+  }catch(err){
+    showErr('Cannot connect to server. Check the URL above.');
+    btn.disabled=false;btn.innerHTML='Sign In';
+  }
+}
+function showErr(msg){document.getElementById('errText').textContent=msg;document.getElementById('errBox').classList.add('show');}
+function togglePw(){const i=document.getElementById('password');i.type=i.type==='password'?'text':'password';}
+window.onload=()=>checkServer(serverUrl);
+</script>
+</body>
+</html>

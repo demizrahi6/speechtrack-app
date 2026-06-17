@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Speech Track — Assessment</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{--teal:#1A4A5C;--teal-mid:#2A6A82;--teal-light:#4A9AB8;--sage:#4A8C7A;--amber:#E8943A;--red:#C94040;--bg:#EEF2F5;--white:#fff;--border:#D4E0E8;--text:#1C2B33;--muted:#7A96A8;}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direction:column;overflow:hidden;}
+header{background:var(--teal);padding:0 20px;height:50px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.logo{display:flex;align-items:center;gap:9px;font-size:15px;font-weight:700;color:#fff;}
+.logo-icon{width:24px;height:24px;background:var(--teal-light);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px;}
+.header-right{display:flex;align-items:center;gap:12px;}
+.hbtn{background:none;border:none;cursor:pointer;color:rgba(255,255,255,0.7);padding:4px 8px;border-radius:5px;font-size:11px;font-weight:500;font-family:'Inter',sans-serif;}
+.hbtn:hover{background:rgba(255,255,255,0.1);color:white;}
+.badge{padding:3px 9px;background:rgba(184,134,11,0.2);border:1px solid rgba(184,134,11,0.4);border-radius:20px;font-size:10px;font-weight:600;color:#F5D060;}
+.workspace{display:grid;grid-template-columns:220px 1fr 300px;height:calc(100vh - 50px);overflow:hidden;}
+.sidebar{background:var(--white);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto;padding:14px;gap:12px;}
+.sl{font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted);padding-bottom:5px;border-bottom:1px solid var(--border);}
+.fi{font-family:'Inter',sans-serif;font-size:12px;padding:6px 9px;border:1px solid var(--border);border-radius:6px;background:var(--bg);color:var(--text);outline:none;width:100%;margin-top:3px;}
+.fi:focus{border-color:var(--teal-light);background:white;}
+.lbl{font-size:11px;font-weight:500;color:var(--muted);margin-top:6px;display:block;}
+.timer{font-family:'JetBrains Mono',monospace;font-size:19px;font-weight:500;color:var(--teal);text-align:center;padding:2px 0;}
+.timer.on{color:var(--red);}
+.rbtn{width:100%;padding:10px;border-radius:8px;border:none;cursor:pointer;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:7px;background:var(--teal);color:white;margin-top:4px;}
+.rbtn:hover{background:var(--teal-mid);}
+.rbtn.rec{background:var(--red);}
+.rdot{width:9px;height:9px;border-radius:50%;background:rgba(255,255,255,0.8);}
+.rbtn.rec .rdot{animation:blink 1s infinite;}
+.ubtn{width:100%;padding:7px;border-radius:7px;border:1.5px dashed var(--border);cursor:pointer;font-family:'Inter',sans-serif;font-size:12px;color:var(--muted);background:transparent;display:flex;align-items:center;justify-content:center;gap:5px;margin-top:4px;}
+.ubtn:hover{border-color:var(--teal-light);color:var(--teal-mid);}
+.abtn{width:100%;padding:9px;border-radius:7px;border:none;cursor:pointer;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;background:var(--sage);color:white;margin-top:4px;}
+.abtn:hover:not(:disabled){background:#6BAF9B;}
+.abtn:disabled{opacity:.4;cursor:not-allowed;}
+.cbtn{width:100%;padding:7px;border-radius:7px;border:1px solid var(--border);cursor:pointer;font-family:'Inter',sans-serif;font-size:12px;color:var(--muted);background:transparent;margin-top:4px;}
+.cbtn:hover{border-color:var(--red);color:var(--red);}
+.main{display:flex;flex-direction:column;overflow:hidden;}
+.wbar{background:var(--white);border-bottom:1px solid var(--border);padding:7px 16px;display:flex;align-items:center;gap:10px;flex-shrink:0;}
+canvas{flex:1;height:40px;border-radius:5px;background:var(--bg);}
+.wlbl{font-size:10px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);}
+.tbar{padding:10px 16px 7px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.ttitle{font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px;}
+.leg{display:flex;gap:10px;}
+.li{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--muted);}
+.ld{width:7px;height:7px;border-radius:50%;}
+.tscroll{flex:1;overflow-y:auto;padding:0 14px 14px;display:flex;flex-direction:column;gap:10px;}
+.tscroll::-webkit-scrollbar{width:4px;}
+.tscroll::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+.utt{display:flex;gap:8px;align-items:flex-start;}
+.utt.cli{opacity:.75;}
+.stag{font-size:9px;font-weight:600;letter-spacing:.6px;text-transform:uppercase;padding:3px 6px;border-radius:4px;margin-top:3px;flex-shrink:0;white-space:nowrap;}
+.stag.cl{background:rgba(42,106,130,0.1);color:#2A6A82;}
+.stag.cn{background:rgba(122,107,170,0.1);color:#7A6BAA;}
+.bub{background:var(--white);border-radius:8px;padding:8px 11px;box-shadow:0 1px 3px rgba(26,74,92,0.08);flex:1;border-left:3px solid transparent;}
+.utt.cl .bub{border-left-color:#2A6A82;}
+.utt.cn .bub{border-left-color:#7A6BAA;}
+.utxt{font-size:13px;line-height:1.55;font-family:'JetBrains Mono',monospace;}
+.umeta{font-size:10px;color:var(--muted);margin-top:3px;}
+.interim{font-style:italic;color:var(--muted);font-size:12px;padding:6px 11px;background:var(--white);border-radius:7px;border:1px dashed var(--border);font-family:'JetBrains Mono',monospace;}
+.empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;color:var(--muted);}
+.ei{width:48px;height:48px;border-radius:13px;background:var(--white);border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:20px;}
+.et{font-size:14px;font-weight:600;color:#4A6172;}
+.es{font-size:12px;text-align:center;max-width:220px;line-height:1.5;}
+.smsg{font-size:11px;color:var(--muted);padding:4px 8px;text-align:center;}
+.rpanel{background:var(--white);border-left:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto;}
+.rtabs{display:flex;border-bottom:1px solid var(--border);flex-shrink:0;}
+.rtab{flex:1;padding:9px 4px;border:none;cursor:pointer;font-family:'Inter',sans-serif;font-size:11px;font-weight:500;background:transparent;color:var(--muted);border-bottom:2px solid transparent;}
+.rtab.on{color:var(--teal);border-bottom-color:var(--teal);}
+.tp{display:none;flex:1;overflow-y:auto;flex-direction:column;}
+.tp.on{display:flex;}
+.ph{padding:18px 14px;text-align:center;font-size:12px;color:var(--muted);line-height:1.6;}
+.gc{padding:16px 14px 12px;border-bottom:1px solid var(--border);display:flex;flex-direction:column;align-items:center;gap:6px;}
+.gw{position:relative;width:120px;height:70px;}
+.gn{position:absolute;bottom:0;left:50%;transform:translateX(-50%);font-size:24px;font-weight:700;color:var(--teal);font-family:'JetBrains Mono',monospace;line-height:1;}
+.gi{font-size:11px;font-weight:600;padding:2px 9px;border-radius:20px;}
+.gi.h{background:rgba(74,140,122,0.12);color:var(--sage);}
+.gi.m{background:rgba(232,148,58,0.12);color:var(--amber);}
+.gi.l{background:rgba(201,64,64,0.12);color:var(--red);}
+.mg{padding:10px 14px;display:grid;grid-template-columns:1fr 1fr;gap:7px;border-bottom:1px solid var(--border);}
+.mc{background:var(--bg);border-radius:7px;padding:8px 10px;border:1px solid var(--border);}
+.mv{font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:600;color:var(--teal);}
+.ml{font-size:10px;color:var(--muted);margin-top:1px;}
+.sb{padding:10px 14px;border-bottom:1px solid var(--border);}
+.sh{font-size:10px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);margin-bottom:7px;}
+.ebr{display:flex;flex-direction:column;gap:5px;}
+.ebi{display:flex;flex-direction:column;gap:2px;}
+.ebl{display:flex;justify-content:space-between;font-size:12px;}
+.ebc{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);}
+.ebt{height:5px;background:var(--bg);border-radius:3px;overflow:hidden;}
+.ebf{height:100%;border-radius:3px;background:var(--amber);transition:width .6s;}
+.el{display:flex;flex-direction:column;gap:5px;}
+.ei2{background:var(--bg);border-radius:6px;padding:6px 8px;border-left:3px solid var(--amber);}
+.et2{font-size:9px;color:var(--amber);font-weight:600;text-transform:uppercase;letter-spacing:.5px;}
+.ep{font-family:'JetBrains Mono',monospace;font-size:12px;}
+.ex{font-size:10px;color:var(--muted);}
+.an{background:linear-gradient(135deg,rgba(26,74,92,0.04),rgba(74,154,184,0.06));border:1px solid rgba(74,154,184,0.2);border-radius:7px;padding:10px;font-size:12px;line-height:1.6;color:#4A6172;}
+.exps{padding:12px 14px;display:flex;flex-direction:column;gap:8px;}
+.exc{background:var(--bg);border:1px solid var(--border);border-radius:9px;padding:12px 14px;cursor:pointer;}
+.exc:hover{border-color:var(--teal-light);}
+.exc.dis{opacity:.35;pointer-events:none;}
+.ext{font-size:13px;font-weight:600;margin-bottom:3px;}
+.exs{font-size:11px;color:var(--muted);line-height:1.4;}
+.anote{font-size:11px;color:var(--amber);margin-top:4px;font-style:italic;padding:3px 6px;background:rgba(232,148,58,0.08);border-radius:4px;border-left:2px solid var(--amber);}
+.edit-btn{font-size:10px;color:var(--muted);background:none;border:none;cursor:pointer;padding:2px 5px;border-radius:3px;margin-top:2px;}
+.edit-btn:hover{background:var(--bg);color:var(--teal);}
+.edit-area{width:100%;margin-top:4px;font-size:12px;font-family:Inter,sans-serif;padding:4px 6px;border:1px solid var(--teal-light);border-radius:4px;resize:none;background:var(--white);}
+.spin{width:12px;height:12px;border-radius:50%;border:2px solid rgba(255,255,255,0.3);border-top-color:white;animation:spin .7s linear infinite;display:inline-block;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo"><div class="logo-icon">🎙️</div>Speech Track</div>
+  <div class="header-right">
+    <span id="uname" style="font-size:11px;color:rgba(255,255,255,0.6);"></span>
+    <div class="badge">🔒 HIPAA-Aware</div>
+    <button class="hbtn" onclick="signOut()">↩ Sign Out</button>
+  </div>
+</header>
+<div class="workspace">
+  <aside class="sidebar">
+    <div class="sl">Session Info</div>
+    <div><span class="lbl">Client Code</span><input class="fi" id="cid" placeholder="e.g. PT-042"/></div>
+    <div><span class="lbl">Age</span><input class="fi" id="cage" placeholder="e.g. 4;6"/></div>
+    <div><span class="lbl">Assessment Type</span>
+      <select class="fi" id="atype">
+        <option value="spontaneous">Spontaneous Speech</option>
+        <option value="elicited">Elicited Sample</option>
+        <option value="single_word">Single Word</option>
+        <option value="reading">Reading Passage</option>
+      </select>
+    </div>
+    <div><span class="lbl">Dialect</span>
+      <select class="fi" id="dialect">
+        <option value="en-US">English (US)</option>
+        <option value="en-GB">English (UK)</option>
+        <option value="es-US">Spanish (US)</option>
+      </select>
+    </div>
+    <div class="sl" style="margin-top:4px">Recording</div>
+    <div class="timer" id="timer">00:00</div>
+    <button class="rbtn" id="rbtn" onclick="toggleRec()"><div class="rdot"></div><span id="rtxt">Start Recording</span></button>
+    <button class="ubtn" onclick="document.getElementById('aup').click()">📁 Upload Audio File</button>
+    <input type="file" id="aup" accept="audio/*,video/mp4" style="display:none" onchange="handleUpload(event);this.value=''"/>
+    <div class="sl" style="margin-top:4px">Analysis</div>
+    <button class="abtn" id="abtn" onclick="runAnalysis()" disabled>Analyze Speech</button>
+    <button class="cbtn" onclick="clearAll()">Clear Session</button>
+  </aside>
+  <main class="main">
+    <div class="wbar"><span class="wlbl">Audio</span><canvas id="wv"></canvas></div>
+    <div class="tbar">
+      <div class="ttitle">🎙 Transcript</div>
+      <div class="leg">
+        <div class="li"><div class="ld" style="background:#2A6A82"></div>Client</div>
+        <div class="li"><div class="ld" style="background:#7A6BAA"></div>Clinician</div>
+      </div>
+    </div>
+    <div class="tscroll" id="ts">
+      <div class="empty" id="emp">
+        <div class="ei">🎙️</div>
+        <div class="et">No transcript yet</div>
+        <div class="es">Start recording or upload an audio file to begin.</div>
+      </div>
+    </div>
+  </main>
+  <aside class="rpanel">
+    <div class="rtabs">
+      <button class="rtab on" onclick="switchTab('analysis',this)">Analysis</button>
+      <button class="rtab" onclick="switchTab('clinical',this)">Clinical</button>
+      <button class="rtab" onclick="switchTab('export',this)">Export</button>
+    </div>
+    <div class="tp on" id="tab-analysis"><div class="ph" id="ab">Record a session then click Analyze Speech.</div></div>
+    <div class="tp" id="tab-clinical"><div class="ph" id="cb">Clinical interpretation will appear after analysis.</div></div>
+    <div class="tp" id="tab-export">
+      <div class="exps">
+        <div class="exc dis" id="esoap" onclick="exportSOAP()"><div class="ext">📋 SOAP Note</div><div class="exs">Paste directly into your EHR</div></div>
+        <div class="exc dis" id="erep" onclick="exportReport()"><div class="ext">📄 Clinical Report</div><div class="exs">Full intelligibility report with scores</div></div>
+        <div class="exc dis" id="ecsv" onclick="exportCSV()"><div class="ext">📊 Data Export (CSV)</div><div class="exs">Raw data for research or tracking</div></div>
+        <div class="exc dis" id="etrans" onclick="exportTranscript()"><div class="ext">💬 Transcript Only</div><div class="exs">Full session transcript with timestamps</div></div>
+      </div>
+    </div>
+  </aside>
+</div>
+<script>
+// Auth guard
+(function(){
+  const token=sessionStorage.getItem('st_token');
+  const exp=parseInt(sessionStorage.getItem('st_token_exp')||'0');
+  if(!token||Date.now()>exp){window.location.replace('./speechtrack_login.html');return;}
+  const user=JSON.parse(sessionStorage.getItem('st_user')||'{}');
+  window.__token=token;
+  window.__user=user;
+  window.__server=sessionStorage.getItem('st_server_url')||'';
+  document.getElementById('uname').textContent=user.name||user.email||'';
+})();
+
+const S={rec:false,utts:[],result:null,secs:0,iv:null,SR:null,AC:null,AN:null,af:null,stream:null,speaker:'client'};
+
+function signOut(){sessionStorage.clear();window.location.replace('./speechtrack_login.html');}
+
+// Timer
+function startTimer(){S.secs=0;S.iv=setInterval(()=>{S.secs++;const el=document.getElementById('timer');el.textContent=pad(Math.floor(S.secs/60))+':'+pad(S.secs%60);el.classList.add('on');},1000);}
+function stopTimer(){clearInterval(S.iv);document.getElementById('timer').classList.remove('on');}
+function pad(n){return String(n).padStart(2,'0');}
+
+// Waveform
+function drawIdle(){const c=document.getElementById('wv');if(!c.offsetWidth)return;const ctx=c.getContext('2d');c.width=c.offsetWidth*devicePixelRatio;c.height=c.offsetHeight*devicePixelRatio;ctx.scale(devicePixelRatio,devicePixelRatio);ctx.strokeStyle='#D4E0E8';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(0,c.offsetHeight/2);ctx.lineTo(c.offsetWidth,c.offsetHeight/2);ctx.stroke();}
+function startWave(stream,color){const c=document.getElementById('wv');c.width=c.offsetWidth*devicePixelRatio;c.height=c.offsetHeight*devicePixelRatio;const ctx=c.getContext('2d');ctx.scale(devicePixelRatio,devicePixelRatio);S.AC=new(window.AudioContext||window.webkitAudioContext)();const src=S.AC.createMediaStreamSource(stream);S.AN=S.AC.createAnalyser();S.AN.fftSize=256;src.connect(S.AN);drawWave(ctx,c.offsetWidth,c.offsetHeight,color);}
+function startWaveEl(color){const c=document.getElementById('wv');c.width=c.offsetWidth*devicePixelRatio;c.height=c.offsetHeight*devicePixelRatio;const ctx=c.getContext('2d');ctx.scale(devicePixelRatio,devicePixelRatio);drawWave(ctx,c.offsetWidth,c.offsetHeight,color);}
+function drawWave(ctx,w,h,color){const buf=S.AN.frequencyBinCount,arr=new Uint8Array(buf);function f(){S.af=requestAnimationFrame(f);S.AN.getByteTimeDomainData(arr);ctx.clearRect(0,0,w,h);ctx.lineWidth=2;ctx.strokeStyle=color;ctx.beginPath();const sw=w/buf;let x=0;for(let i=0;i<buf;i++){const v=arr[i]/128,y=(v*h)/2;i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);x+=sw;}ctx.stroke();}f();}
+function stopWave(){cancelAnimationFrame(S.af);if(S.AC){S.AC.close();S.AC=null;}drawIdle();}
+
+// Recording
+async function toggleRec(){if(!S.rec)await startRec();else stopRec();}
+async function startRec(){
+  try{
+    const stream=await navigator.mediaDevices.getUserMedia({audio:{sampleRate:16000,channelCount:1,echoCancellation:true}});
+    S.rec=true;S.stream=stream;
+    document.getElementById('rbtn').classList.add('rec');
+    document.getElementById('rtxt').textContent='Stop Recording';
+    startTimer();startWave(stream,'#2A6A82');hideEmpty();
+    const serverUrl=window.__server.replace('https://','wss://').replace('http://','ws://');
+    S.ws=new WebSocket(serverUrl+'/stream');
+    S.ws.binaryType='arraybuffer';
+    let interimEl=null;
+    S.ws.onmessage=e=>{
+      const msg=JSON.parse(e.data);
+      if(msg.type==='partial'){
+        if(!interimEl){interimEl=document.createElement('div');interimEl.className='interim';document.getElementById('ts').appendChild(interimEl);}
+        interimEl.textContent=msg.text+'…';scrollB();
+      } else if(msg.type==='final'){
+        if(interimEl){interimEl.remove();interimEl=null;}
+        if(msg.text.trim())addUtt(msg.text.trim(),msg.speaker||'client');
+      } else if(msg.type==='done'){
+        if(S.utts.length>0)document.getElementById('abtn').disabled=false;
+      } else if(msg.type==='error'){
+        addSys('⚠️ Streaming error: '+msg.message);
+      }
+    };
+    S.ws.onopen=()=>{
+      const AC=new(window.AudioContext||window.webkitAudioContext)({sampleRate:16000});
+      S.AC=AC;
+      const src=AC.createMediaStreamSource(stream);
+      const processor=AC.createScriptProcessor(4096,1,1);
+      processor.onaudioprocess=e=>{
+        if(!S.rec||S.ws.readyState!==WebSocket.OPEN)return;
+        const input=e.inputBuffer.getChannelData(0);
+        const pcm=new Int16Array(input.length);
+        for(let i=0;i<input.length;i++)pcm[i]=Math.max(-32768,Math.min(32767,input[i]*32768));
+        S.ws.send(pcm.buffer);
+      };
+      src.connect(processor);
+      processor.connect(AC.destination);
+      S.processor=processor;S.src=src;
+    };
+    S.ws.onerror=()=>addSys('⚠️ Connection error. Check server.');
+  }catch(e){addSys('⚠️ Mic access denied: '+e.message);}
+}
+function stopRec(){
+  S.rec=false;
+  if(S.ws&&S.ws.readyState===WebSocket.OPEN){S.ws.send(JSON.stringify({type:'stop'}));S.ws.close();S.ws=null;}
+  if(S.processor){S.processor.disconnect();S.processor=null;}
+  if(S.src){S.src.disconnect();S.src=null;}
+  if(S.stream){S.stream.getTracks().forEach(t=>t.stop());S.stream=null;}
+  stopTimer();stopWave();
+  document.getElementById('rbtn').classList.remove('rec');
+  document.getElementById('rtxt').textContent='Start Recording';
+}
+
+// Upload
+function handleUpload(e){
+  const file=e.target.files[0];if(!file)return;
+  hideEmpty();addSys('📁 '+file.name+' loaded');
+  if(window.__server){uploadToServer(file);}
+  else{addSys('ℹ️ No backend — using browser transcription (Chrome + volume on required)');browserTranscribe(file);}
+}
+async function uploadToServer(file){
+  addSys('📡 Uploading for transcription…');
+  const fd=new FormData();fd.append('audio',file,file.name);fd.append('dialect',document.getElementById('dialect').value);
+  try{
+    const r=await fetch(window.__server+'/transcribe',{method:'POST',headers:{'X-Session-ID':'st-'+Date.now(),'Authorization':'Bearer '+window.__token},body:fd});
+    const d=await r.json();
+    (d.utterances||[]).forEach(u=>addUtt(u.text,u.speaker));
+    addSys('✓ Transcription complete via '+(d.provider||'server')+' — '+(d.utterances||[]).length+' utterances'+(d.note?' ('+d.note+')':''));
+    if(S.utts.length>0)document.getElementById('abtn').disabled=false;
+  }catch(err){addSys('⚠️ Server transcription failed: '+err.message+'. Trying browser…');browserTranscribe(file);}
+}
+function browserTranscribe(file){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){addSys('⚠️ Browser transcription requires Chrome. Configure a backend server for mobile support.');return;}
+  const url=URL.createObjectURL(file);const audio=new Audio(url);audio.crossOrigin='anonymous';
+  const AC=new(window.AudioContext||window.webkitAudioContext)();
+  const src=AC.createMediaElementSource(audio);S.AN=AC.createAnalyser();S.AN.fftSize=256;
+  src.connect(S.AN);src.connect(AC.destination);S.AC=AC;
+  startWaveEl('#E8943A');
+  addSys('▶ Playing audio for transcription — keep tab active, volume on.');
+  const rec=new SR();rec.continuous=true;rec.interimResults=false;rec.lang=document.getElementById('dialect').value;
+  let n=0;
+  rec.onresult=e=>{for(let i=e.resultIndex;i<e.results.length;i++){if(e.results[i].isFinal){const t=e.results[i][0].transcript.trim();if(t){const isCli=/\b(say|repeat|tell me|what|can you|describe|show|name|count|try)\b/i.test(t);addUtt(t,isCli?'clinician':'client');n++;heuristic(t);}}}};
+  rec.onerror=e=>{if(e.error!=='no-speech')console.warn(e.error);};
+  rec.onend=()=>{if(!audio.ended&&!audio.paused)rec.start();};
+  audio.onplay=()=>rec.start();
+  audio.onended=()=>{rec.stop();stopWave();URL.revokeObjectURL(url);if(n===0){addSys('⚠️ No speech detected. Check volume and use Chrome.');}else{addSys('✓ Done — '+n+' utterances captured.');document.getElementById('abtn').disabled=false;}};
+  audio.onerror=()=>{addSys('⚠️ Could not load file.');stopWave();};
+  audio.play().catch(err=>addSys('⚠️ Playback blocked: '+err.message+'. Click page first.'));
+}
+
+// Transcript UI
+function hideEmpty(){const e=document.getElementById('emp');if(e)e.style.display='none';}
+function addUtt(text,speaker){
+  if(!text)return;
+  const i=S.utts.length;
+  S.utts.push({text,speaker,note:'',ts:new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit'})});
+  const ts=document.getElementById('ts');
+  const d=document.createElement('div');
+  d.className='utt '+(speaker==='client'?'cl':'cn');
+  d.id='utt-'+i;
+  d.innerHTML=`<div class="stag ${speaker==='client'?'cl':'cn'}">${speaker==='client'?'Client':'Clinician'}</div><div class="bub"><div class="utxt">${esc(text)}</div><div class="umeta">${S.utts[i].ts}${speaker==='client'?' <button class="edit-btn" onclick="addNote('+i+')">✏️ note error</button>':''}</div><div id="note-${i}"></div></div>`;
+  ts.appendChild(d);scrollB();
+}
+function addNote(i){
+  const noteDiv=document.getElementById('note-'+i);
+  if(noteDiv.querySelector('textarea'))return;
+  const existing=S.utts[i].note||'';
+  noteDiv.innerHTML=`<textarea class="edit-area" rows="2" placeholder="What did client actually say? e.g. graduation→galleration" onblur="saveNote(${i},this.value)">${existing}</textarea>`;
+  noteDiv.querySelector('textarea').focus();
+}
+function swapSpeaker(i){
+  const utt=S.utts[i];
+  utt.speaker=utt.speaker==='client'?'clinician':'client';
+  const d=document.getElementById('utt-'+i);
+  d.className='utt '+(utt.speaker==='client'?'cl':'cn');
+  document.getElementById('stag-'+i).className='stag '+(utt.speaker==='client'?'cl':'cn');
+  document.getElementById('stag-'+i).textContent=utt.speaker==='client'?'Client':'Clinician';
+}
+function saveNote(i,val){
+  S.utts[i].note=val.trim();
+  const noteDiv=document.getElementById('note-'+i);
+  noteDiv.innerHTML=val.trim()?`<div class="anote">📝 ${esc(val.trim())} <button class="edit-btn" onclick="addNote(${i})">edit</button></div>`:'';
+}
+function addSys(msg){const ts=document.getElementById('ts');const d=document.createElement('div');d.className='smsg';d.textContent=msg;ts.appendChild(d);scrollB();}
+function scrollB(){const s=document.getElementById('ts');s.scrollTop=s.scrollHeight;}
+function esc(t){return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+// Analysis
+async function runAnalysis(){
+  const cu=S.utts.filter(u=>u.speaker==='client').map(u=>u.text);
+  if(!cu.length){addSys('No client utterances found.');return;}
+  document.getElementById('abtn').disabled=true;
+  document.getElementById('abtn').innerHTML='<div class="spin"></div> Analyzing…';
+  try{
+    let result;
+    if(window.__server){
+      const r=await fetch(window.__server+'/analyze',{method:'POST',headers:{'Content-Type':'application/json','X-Session-ID':'st-'+Date.now(),'Authorization':'Bearer '+window.__token},body:JSON.stringify({utterances:S.utts.map(u=>({...u,note:u.note||''})),clientAge:document.getElementById('cage').value,assessType:document.getElementById('atype').value,dialect:document.getElementById('dialect').value})});
+      result=await r.json();
+    }else{result=localAnalysis(cu);}
+    S.result=result;
+    renderAnalysis(result);renderClinical(result);enableExports();
+    switchTab('analysis',document.querySelector('.rtab'));
+  }catch(err){addSys('⚠️ Analysis error: '+err.message);result=localAnalysis(cu);S.result=result;renderAnalysis(result);renderClinical(result);enableExports();}
+  document.getElementById('abtn').disabled=false;document.getElementById('abtn').textContent='Re-analyze';
+}
+
+function localAnalysis(utts){
+  const text=utts.join(' ').toLowerCase();const words=text.split(/\s+/).filter(w=>w).length;
+  const pats=[{r:/\bw(?=un|ed|eal|ight)/g,t:'/r/',p:'/w/',ty:'substitution',ex:'run→wun'},{r:/\by(?=ike|et)/g,t:'/l/',p:'/y/',ty:'substitution',ex:'like→yike'},{r:/\bfw/g,t:'/fr/',p:'/fw/',ty:'substitution',ex:'friends→fwiends'},{r:/\bda\b|\bde\b/g,t:'/ð/',p:'/d/',ty:'substitution',ex:'the→da'},{r:/\bwif\b/g,t:'/wɪθ/',p:'/wɪf/',ty:'substitution',ex:'with→wif'}];
+  let errs=0;const pe=[];const ec={substitutions:0,omissions:0,distortions:0,additions:0};
+  pats.forEach(p=>{const m=(text.match(p.r)||[]).length;if(m>0){errs+=m;ec.substitutions+=m;pe.push({target:p.t,produced:p.p,error_type:p.ty,example_word:p.ex,frequency:m});}});
+  const pct=Math.round((1-Math.min(errs/Math.max(words,1),0.8)*0.6)*100);
+  const sev=pct>=90?'mild':pct>=75?'mild-moderate':pct>=50?'moderate':'moderate-severe';
+  return{intelligibility_percent:pct,total_words:words,intelligible_words:Math.round(words*pct/100),total_utterances:utts.length,error_types:ec,phoneme_errors:pe,error_patterns:pe.length?['Liquid gliding','Stopping of fricatives']:[],clinical_interpretation:'Based on the sample analyzed, speech intelligibility is '+pct+'%. '+( pct>=75?'Patterns are consistent with a mild phonological delay.':'Multiple error patterns suggest a moderate phonological delay warranting further evaluation.'),severity_rating:sev,recommendations:['Target /r/ and /l/ in structured therapy','Address cluster reduction','Consider formal phonological assessment (GFTA-3)'],suggested_formal_assessments:['Goldman-Fristoe Test of Articulation (GFTA-3)','Bankson-Bernthal Test of Phonology (BBTOP)'],stimulability_notes:'Stimulability data not available from automated analysis.',analysis_mode:'LOCAL'};
+}
+
+function renderAnalysis(r){
+  const pct=r.intelligibility_percent;
+  const ic=pct>=75?'h':pct>=50?'m':'l';
+  const il=pct>=75?'Functional':pct>=50?'Reduced':'Significantly Reduced';
+  const ang=(pct/100)*180;
+  const ex=70+55*Math.cos((ang*Math.PI/180)-Math.PI);
+  const ey=70+55*Math.sin((ang*Math.PI/180)-Math.PI);
+  const la=ang>180?1:0;
+  const col=pct>=75?'#4A8C7A':pct>=50?'#E8943A':'#C94040';
+  const te=Object.values(r.error_types).reduce((a,b)=>a+b,0);
+  const me=Math.max(...Object.values(r.error_types),1);
+  document.getElementById('ab').outerHTML=`<div id="ab">
+    <div style="padding:6px 14px;border-bottom:1px solid var(--border);font-size:10px;color:${r.analysis_mode==='LOCAL'?'var(--sage)':'var(--amber)'}; font-weight:600;">${r.analysis_mode||'LOCAL'}</div>
+    <div class="gc">
+      <div style="font-size:10px;font-weight:600;color:var(--muted);letter-spacing:.8px;text-transform:uppercase;">Speech Intelligibility</div>
+      <div class="gw">
+        <svg width="120" height="70" viewBox="0 0 140 80"><path d="M 15 70 A 55 55 0 0 1 125 70" fill="none" stroke="#EEF2F5" stroke-width="10" stroke-linecap="round"/><path d="M 15 70 A 55 55 0 ${la} 1 ${ex.toFixed(1)} ${ey.toFixed(1)}" fill="none" stroke="${col}" stroke-width="10" stroke-linecap="round"/></svg>
+        <div class="gn">${pct}%</div>
+      </div>
+      <div class="gi ${ic}">${il}</div>
+    </div>
+    <div class="mg">
+      <div class="mc"><div class="mv">${r.total_words}</div><div class="ml">Total Words</div></div>
+      <div class="mc"><div class="mv">${r.intelligible_words}</div><div class="ml">Intelligible</div></div>
+      <div class="mc"><div class="mv">${r.total_utterances}</div><div class="ml">Utterances</div></div>
+      <div class="mc"><div class="mv">${te}</div><div class="ml">Total Errors</div></div>
+    </div>
+    <div class="sb"><div class="sh">Error Types</div><div class="ebr">${Object.entries(r.error_types).map(([k,v])=>`<div class="ebi"><div class="ebl"><span>${k.charAt(0).toUpperCase()+k.slice(1)}</span><span class="ebc">${v}</span></div><div class="ebt"><div class="ebf" style="width:${Math.round(v/me*100)}%"></div></div></div>`).join('')}</div></div>
+    <div class="sb"><div class="sh">Phoneme Errors</div><div class="el">${r.phoneme_errors.slice(0,6).map(e=>`<div class="ei2"><div class="et2">${e.error_type}${e.frequency>1?' ×'+e.frequency:''}</div><div class="ep">${e.target} → ${e.produced}</div><div class="ex">${e.example_word}</div></div>`).join('')}</div></div>
+  </div>`;
+}
+
+function renderClinical(r){
+  const sc={mild:'background:rgba(74,140,122,0.12);color:var(--sage)','mild-moderate':'background:rgba(232,148,58,0.1);color:#9A6A20',moderate:'background:rgba(232,148,58,0.2);color:var(--amber)','moderate-severe':'background:rgba(201,64,64,0.1);color:#a83535',severe:'background:rgba(201,64,64,0.2);color:var(--red)'};
+  document.getElementById('cb').outerHTML=`<div id="cb" style="padding:0 0 14px 0;">
+    <div class="sb"><div class="sh">Severity</div><span style="display:inline-block;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:600;${sc[r.severity_rating]||''}">${r.severity_rating}</span></div>
+    <div class="sb"><div class="sh">Error Patterns</div>${r.error_patterns.map(p=>`<div style="font-size:12px;color:#4A6172;padding:3px 0;">• ${p}</div>`).join('')||'<div style="font-size:12px;color:var(--muted)">None identified.</div>'}</div>
+    <div class="sb"><div class="sh">Stimulability</div><div class="an">${r.stimulability_notes}</div></div>
+    <div class="sb"><div class="sh">Clinical Interpretation</div><div class="an">${r.clinical_interpretation}</div></div>
+    <div class="sb"><div class="sh">Recommendations</div>${(r.recommendations||[]).map((rec,i)=>`<div style="font-size:12px;color:#4A6172;padding:4px 0;"><strong style="color:var(--teal)">${i+1}.</strong> ${rec}</div>`).join('')}</div>
+    <div class="sb"><div class="sh">Suggested Assessments</div>${(r.suggested_formal_assessments||[]).map(t=>`<div style="font-size:12px;color:#4A6172;padding:3px 0;">• ${t}</div>`).join('')||'<div style="font-size:12px;color:var(--muted)">None at this time.</div>'}</div>
+  </div>`;
+}
+
+function enableExports(){['esoap','erep','ecsv','etrans'].forEach(id=>{const el=document.getElementById(id);if(el)el.classList.remove('dis');});}
+function switchTab(name,btn){document.querySelectorAll('.rtab').forEach(t=>t.classList.remove('on'));document.querySelectorAll('.tp').forEach(p=>p.classList.remove('on'));if(btn)btn.classList.add('on');const tp=document.getElementById('tab-'+name);if(tp)tp.classList.add('on');}
+
+function getMeta(){return{code:document.getElementById('cid').value||'UNKNOWN',age:document.getElementById('cage').value||'Unknown',type:document.getElementById('atype').value,date:new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'}),time:new Date().toLocaleTimeString(),sid:'ST-'+Date.now().toString(36).toUpperCase()};}
+function dl(content,filename,type='text/plain'){const b=new Blob([content],{type});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=filename;a.click();}
+
+function exportSOAP(){
+  if(!S.result)return;const r=S.result;const m=getMeta();
+  dl(`SPEECH-LANGUAGE PATHOLOGY SESSION NOTE — SOAP FORMAT\n[DE-IDENTIFIED — Client: ${m.code}]\n${'═'.repeat(50)}\nDate: ${m.date}  Time: ${m.time}\nClient Code: ${m.code}  Age: ${m.age}\nAssessment: ${m.type}\n\nSUBJECTIVE\n${'─'.repeat(30)}\nClient participated in a ${m.type} speech sample.\n\nOBJECTIVE\n${'─'.repeat(30)}\nIntelligibility: ${r.intelligibility_percent}% (${r.total_words} words; ${r.intelligible_words} intelligible)\nSeverity: ${r.severity_rating}\nSubstitutions: ${r.error_types.substitutions}  Omissions: ${r.error_types.omissions}  Distortions: ${r.error_types.distortions}\n\nPhoneme Errors:\n${r.phoneme_errors.map(e=>`• ${e.target} → ${e.produced} [${e.error_type}] — ${e.example_word}`).join('\n')}\n\nASSESSMENT\n${'─'.repeat(30)}\n${r.clinical_interpretation}\n\nPLAN\n${'─'.repeat(30)}\n${r.recommendations.map((rec,i)=>`${i+1}. ${rec}`).join('\n')}\n\n${'═'.repeat(50)}\nClinician: _______________________ Date: _________\n⚠️ Review all AI-generated content before clinical documentation.`,'SpeechTrack_SOAP_'+m.code+'.txt');}
+
+function exportReport(){
+  if(!S.result)return;const r=S.result;const m=getMeta();
+  dl(`SPEECH TRACK INTELLIGIBILITY REPORT\n[DE-IDENTIFIED — Client: ${m.code}]\n${'═'.repeat(50)}\nDate: ${m.date}  Session: ${m.sid}\nClient: ${m.code}  Age: ${m.age}  Type: ${m.type}\nAnalysis: ${r.analysis_mode}\n\nINTELLIGIBILITY: ${r.intelligibility_percent}%  SEVERITY: ${r.severity_rating}\nWords: ${r.total_words}  Intelligible: ${r.intelligible_words}  Utterances: ${r.total_utterances}\n\nERROR TYPES\nSubstitutions: ${r.error_types.substitutions}\nOmissions: ${r.error_types.omissions}\nDistortions: ${r.error_types.distortions}\n\nPHONEME ERRORS\n${r.phoneme_errors.map(e=>`• ${e.target} → ${e.produced} [${e.error_type}] — ${e.example_word}`).join('\n')}\n\nINTERPRETATION\n${r.clinical_interpretation}\n\nRECOMMENDATIONS\n${r.recommendations.map((rec,i)=>`${i+1}. ${rec}`).join('\n')}\n\nTRANSCRIPT\n${S.utts.map(u=>`[${u.speaker.toUpperCase().padEnd(9)}] ${u.text}`).join('\n')}\n${'═'.repeat(50)}\n⚠️ Review all AI-generated content before clinical documentation.`,'SpeechTrack_Report_'+m.code+'.txt');}
+
+function exportCSV(){
+  if(!S.result)return;const r=S.result;const m=getMeta();
+  const rows=[['Field','Value'],['Client',m.code],['Date',m.date],['Age',m.age],['Intelligibility %',r.intelligibility_percent],['Severity',r.severity_rating],['Total Words',r.total_words],['Intelligible Words',r.intelligible_words],['Substitutions',r.error_types.substitutions],['Omissions',r.error_types.omissions],[],['Phoneme','Produced','Type','Example'],...r.phoneme_errors.map(e=>[e.target,e.produced,e.error_type,e.example_word])];
+  dl(rows.map(r=>r.map(c=>'"'+String(c||'').replace(/"/g,'""')+'"').join(',')).join('\n'),'SpeechTrack_Data_'+m.code+'.csv','text/csv');}
+
+function exportTranscript(){
+  if(!S.utts.length)return;const m=getMeta();
+  dl(`SPEECH TRACK TRANSCRIPT\nClient: ${m.code}  Date: ${m.date}\n${'─'.repeat(40)}\n${S.utts.map(u=>`[${u.speaker.toUpperCase().padEnd(9)}] [${u.ts}] ${u.text}`).join('\n')}`,'SpeechTrack_Transcript_'+m.code+'.txt');}
+
+function clearAll(){
+  if(S.rec)stopRec();
+  S.utts=[];S.result=null;S.secs=0;
+  document.getElementById('timer').textContent='00:00';
+  document.getElementById('abtn').disabled=true;document.getElementById('abtn').textContent='Analyze Speech';
+  ['esoap','erep','ecsv','etrans'].forEach(id=>{const el=document.getElementById(id);if(el)el.classList.add('dis');});
+  document.getElementById('ab').innerHTML='Record a session then click Analyze Speech.';
+  document.getElementById('cb').innerHTML='Clinical interpretation will appear after analysis.';
+  document.getElementById('ts').innerHTML='<div class="empty" id="emp"><div class="ei">🎙️</div><div class="et">No transcript yet</div><div class="es">Start recording or upload an audio file to begin.</div></div>';
+}
+
+window.addEventListener('load',()=>setTimeout(drawIdle,100));
+window.addEventListener('resize',()=>{if(!S.rec)drawIdle();});
+</script>
+</body>
+</html>
