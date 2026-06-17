@@ -217,58 +217,31 @@ function stopWave(){cancelAnimationFrame(S.af);if(S.AC){S.AC.close();S.AC=null;}
 async function toggleRec(){if(!S.rec)await startRec();else stopRec();}
 async function startRec(){
   try{
-    const stream=await navigator.mediaDevices.getUserMedia({audio:{sampleRate:16000,channelCount:1,echoCancellation:true}});
-    S.rec=true;S.stream=stream;
+    const stream=await navigator.mediaDevices.getUserMedia({audio:true});
+    S.rec=true;S.stream=stream;S.chunks=[];
     document.getElementById('rbtn').classList.add('rec');
     document.getElementById('rtxt').textContent='Stop Recording';
     startTimer();startWave(stream,'#2A6A82');hideEmpty();
-    const serverUrl=window.__server.replace('https://','wss://').replace('http://','ws://');
-    S.ws=new WebSocket(serverUrl+'/stream');
-    S.ws.binaryType='arraybuffer';
-    let interimEl=null;
-    S.ws.onmessage=e=>{
-      const msg=JSON.parse(e.data);
-      if(msg.type==='partial'){
-        if(!interimEl){interimEl=document.createElement('div');interimEl.className='interim';document.getElementById('ts').appendChild(interimEl);}
-        interimEl.textContent=msg.text+'…';scrollB();
-      } else if(msg.type==='final'){
-        if(interimEl){interimEl.remove();interimEl=null;}
-        if(msg.text.trim())addUtt(msg.text.trim(),msg.speaker||'client');
-      } else if(msg.type==='done'){
-        if(S.utts.length>0)document.getElementById('abtn').disabled=false;
-      } else if(msg.type==='error'){
-        addSys('⚠️ Streaming error: '+msg.message);
-      }
-    };
-    S.ws.onopen=()=>{
-      const AC=new(window.AudioContext||window.webkitAudioContext)({sampleRate:16000});
-      S.AC=AC;
-      const src=AC.createMediaStreamSource(stream);
-      const processor=AC.createScriptProcessor(4096,1,1);
-      processor.onaudioprocess=e=>{
-        if(!S.rec||S.ws.readyState!==WebSocket.OPEN)return;
-        const input=e.inputBuffer.getChannelData(0);
-        const pcm=new Int16Array(input.length);
-        for(let i=0;i<input.length;i++)pcm[i]=Math.max(-32768,Math.min(32767,input[i]*32768));
-        S.ws.send(pcm.buffer);
-      };
-      src.connect(processor);
-      processor.connect(AC.destination);
-      S.processor=processor;S.src=src;
-    };
-    S.ws.onerror=()=>addSys('⚠️ Connection error. Check server.');
+    S.mr=new MediaRecorder(stream,{mimeType:MediaRecorder.isTypeSupported('audio/webm;codecs=opus')?'audio/webm;codecs=opus':'audio/webm'});
+    S.mr.ondataavailable=e=>{if(e.data.size>0)S.chunks.push(e.data);};
+    S.mr.start(1000);
   }catch(e){addSys('⚠️ Mic access denied: '+e.message);}
 }
-function stopRec(){
+async function stopRec(){
   S.rec=false;
-  if(S.ws&&S.ws.readyState===WebSocket.OPEN){S.ws.send(JSON.stringify({type:'stop'}));S.ws.close();S.ws=null;}
-  if(S.processor){S.processor.disconnect();S.processor=null;}
-  if(S.src){S.src.disconnect();S.src=null;}
-  if(S.stream){S.stream.getTracks().forEach(t=>t.stop());S.stream=null;}
   stopTimer();stopWave();
   document.getElementById('rbtn').classList.remove('rec');
   document.getElementById('rtxt').textContent='Start Recording';
-  setTimeout(()=>{if(S.utts.length>0)document.getElementById('abtn').disabled=false;},1000);
+  if(!S.mr)return;
+  S.mr.stop();
+  S.mr.onstop=async()=>{
+    if(S.stream){S.stream.getTracks().forEach(t=>t.stop());S.stream=null;}
+    const blob=new Blob(S.chunks,{type:S.mr.mimeType});
+    S.chunks=[];S.mr=null;
+    if(!window.__server){addSys('⚠️ No server configured.');return;}
+    addSys('⏳ Processing recording… this takes about 60 seconds.');
+    await uploadToServer(blob);
+  };
 }
 
 // Upload
