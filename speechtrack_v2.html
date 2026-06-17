@@ -222,26 +222,51 @@ async function startRec(){
     document.getElementById('rbtn').classList.add('rec');
     document.getElementById('rtxt').textContent='Stop Recording';
     startTimer();startWave(stream,'#2A6A82');hideEmpty();
-    S.mr=new MediaRecorder(stream,{mimeType:MediaRecorder.isTypeSupported('audio/webm;codecs=opus')?'audio/webm;codecs=opus':'audio/webm'});
-    S.mr.ondataavailable=e=>{if(e.data.size>0)S.chunks.push(e.data);};
-    S.mr.start(1000);
+
+    // Use browser speech recognition to capture exact words including errors
+    const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+    if(!SR){addSys('⚠️ Use Chrome for live transcription.');return;}
+    
+    function startSR(){
+      if(!S.rec)return;
+      S.SR=new SR();
+      S.SR.continuous=true;
+      S.SR.interimResults=true;
+      S.SR.lang=document.getElementById('dialect').value;
+      let iEl=null;
+      S.SR.onresult=e=>{
+        let interim='';
+        for(let i=e.resultIndex;i<e.results.length;i++){
+          const t=e.results[i][0].transcript;
+          if(e.results[i].isFinal){
+            if(iEl){iEl.remove();iEl=null;}
+            if(t.trim())addUtt(t.trim(),'client');
+          } else interim+=t;
+        }
+        if(interim){
+          if(!iEl){iEl=document.createElement('div');iEl.className='interim';document.getElementById('ts').appendChild(iEl);}
+          iEl.textContent=interim+'…';scrollB();
+        }
+      };
+      S.SR.onerror=e=>{if(e.error!=='aborted'&&e.error!=='no-speech')console.warn('SR',e.error);};
+      // Auto-restart on end to prevent cutoff on long sessions
+      S.SR.onend=()=>{
+        if(iEl){iEl.remove();iEl=null;}
+        if(S.rec)setTimeout(startSR,200);
+      };
+      S.SR.start();
+    }
+    startSR();
   }catch(e){addSys('⚠️ Mic access denied: '+e.message);}
 }
-async function stopRec(){
+function stopRec(){
   S.rec=false;
+  if(S.SR){S.SR.abort();S.SR=null;}
+  if(S.stream){S.stream.getTracks().forEach(t=>t.stop());S.stream=null;}
   stopTimer();stopWave();
   document.getElementById('rbtn').classList.remove('rec');
   document.getElementById('rtxt').textContent='Start Recording';
-  if(!S.mr)return;
-  S.mr.stop();
-  S.mr.onstop=async()=>{
-    if(S.stream){S.stream.getTracks().forEach(t=>t.stop());S.stream=null;}
-    const blob=new Blob(S.chunks,{type:S.mr.mimeType});
-    S.chunks=[];S.mr=null;
-    if(!window.__server){addSys('⚠️ No server configured.');return;}
-    addSys('⏳ Processing recording… this takes about 60 seconds.');
-    await uploadToServer(blob);
-  };
+  setTimeout(()=>{if(S.utts.length>0)document.getElementById('abtn').disabled=false;},500);
 }
 
 // Upload
