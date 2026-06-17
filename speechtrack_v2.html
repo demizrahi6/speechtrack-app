@@ -382,8 +382,8 @@ function renderAnalysis(r){
   const ey=70+55*Math.sin((ang*Math.PI/180)-Math.PI);
   const la=ang>180?1:0;
   const col=pct>=75?'#4A8C7A':pct>=50?'#E8943A':'#C94040';
-  const te=Object.values(r.error_types).reduce((a,b)=>a+b,0);
-  const me=Math.max(...Object.values(r.error_types),1);
+  const te=r.error_types ? Object.values(r.error_types).reduce((a,b)=>a+b,0) : 0;
+  const me=r.error_types ? Math.max(...Object.values(r.error_types),1) : 1;
   document.getElementById('ab').outerHTML=`<div id="ab">
     <div style="padding:6px 14px;border-bottom:1px solid var(--border);font-size:10px;color:${r.analysis_mode==='LOCAL'?'var(--sage)':'var(--amber)'}; font-weight:600;">${r.analysis_mode||'LOCAL'}</div>
     <div class="gc">
