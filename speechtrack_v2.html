@@ -255,7 +255,7 @@ function handleUpload(e){
 }
 async function uploadToServer(file){
   addSys('📡 Uploading for transcription…');
-  const fd=new FormData();fd.append('audio',file,file.name);fd.append('dialect',document.getElementById('dialect').value);
+  const fd=new FormData();fd.append('audio',file,file.name||'recording.webm');fd.append('dialect',document.getElementById('dialect').value);
   try{
     const r=await fetch(window.__server+'/transcribe',{method:'POST',headers:{'X-Session-ID':'st-'+Date.now(),'Authorization':'Bearer '+window.__token},body:fd});
     const d=await r.json();
