@@ -157,6 +157,7 @@ canvas{flex:1;height:40px;border-radius:5px;background:var(--bg);}
         <div class="li"><div class="ld" style="background:#2A6A82"></div>Client</div>
         <div class="li"><div class="ld" style="background:#7A6BAA"></div>Clinician</div>
       </div>
+      <button class="edit-btn" id="swapAllBtn" onclick="swapAllSpeakers()" style="margin-left:8px" title="If Client and Clinician labels are reversed, click to swap all at once">🔄 Swap All Speakers</button>
     </div>
     <div class="tscroll" id="ts">
       <div class="empty" id="emp">
@@ -311,6 +312,32 @@ function swapSpeaker(i){
   d.className='utt '+(utt.speaker==='client'?'cl':'cn');
   document.getElementById('stag-'+i).className='stag '+(utt.speaker==='client'?'cl':'cn');
   document.getElementById('stag-'+i).textContent=utt.speaker==='client'?'Client':'Clinician';
+}
+function swapAllSpeakers(){
+  if(!S.utts.length)return;
+  if(!confirm('Swap Client and Clinician labels for the entire transcript?'))return;
+  S.utts.forEach((utt,i)=>{
+    utt.speaker=utt.speaker==='client'?'clinician':'client';
+    const d=document.getElementById('utt-'+i);
+    if(d)d.className='utt '+(utt.speaker==='client'?'cl':'cn');
+    const tag=document.getElementById('stag-'+i);
+    if(tag){
+      tag.className='stag '+(utt.speaker==='client'?'cl':'cn');
+      tag.textContent=utt.speaker==='client'?'Client':'Clinician';
+    }
+    const editBtn=d?d.querySelector('.umeta'):null;
+  });
+  rerenderUtteranceActions();
+}
+function rerenderUtteranceActions(){
+  S.utts.forEach((utt,i)=>{
+    const d=document.getElementById('utt-'+i);
+    if(!d)return;
+    const meta=d.querySelector('.umeta');
+    if(!meta)return;
+    const noteBtn=utt.speaker==='client'?' <button class="edit-btn" onclick="addNote('+i+')">✏️ note error</button>':'';
+    meta.innerHTML=utt.ts+noteBtn;
+  });
 }
 function saveNote(i,val){
   S.utts[i].note=val.trim();
