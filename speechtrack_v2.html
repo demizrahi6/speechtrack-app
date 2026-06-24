@@ -143,8 +143,6 @@ canvas{flex:1;height:40px;border-radius:5px;background:var(--bg);}
     <div class="sl" style="margin-top:4px">Recording</div>
     <div class="timer" id="timer">00:00</div>
     <button class="rbtn" id="rbtn" onclick="toggleRec()"><div class="rdot"></div><span id="rtxt">Start Recording</span></button>
-    <button class="ubtn" onclick="document.getElementById('aup').click()">📁 Upload Audio File</button>
-    <input type="file" id="aup" accept="audio/*,video/mp4" style="display:none" onchange="handleUpload(event);this.value=''"/>
     <div class="sl" style="margin-top:4px">Analysis</div>
     <button class="abtn" id="abtn" onclick="runAnalysis()" disabled>Analyze Speech</button>
     <button class="cbtn" onclick="clearAll()">Clear Session</button>
@@ -246,13 +244,8 @@ async function stopRec(){
   };
 }
 
-// Upload
-function handleUpload(e){
-  const file=e.target.files[0];if(!file)return;
-  hideEmpty();addSys('📁 '+file.name+' loaded');
-  if(window.__server){uploadToServer(file);}
-  else{addSys('ℹ️ No backend — using browser transcription (Chrome + volume on required)');browserTranscribe(file);}
-}
+// Live recording upload (server transcription only — file upload removed
+// due to unreliable speaker-role detection on pre-recorded audio)
 async function uploadToServer(file){
   addSys('📡 Uploading for transcription…');
   const fd=new FormData();fd.append('audio',file,file.name||'recording.webm');fd.append('dialect',document.getElementById('dialect').value);
@@ -262,26 +255,7 @@ async function uploadToServer(file){
     (d.utterances||[]).forEach(u=>addUtt(u.text,u.speaker));
     addSys('✓ Transcription complete via '+(d.provider||'server')+' — '+(d.utterances||[]).length+' utterances'+(d.note?' ('+d.note+')':''));
     if(S.utts.length>0)document.getElementById('abtn').disabled=false;
-  }catch(err){addSys('⚠️ Server transcription failed: '+err.message+'. Trying browser…');browserTranscribe(file);}
-}
-function browserTranscribe(file){
-  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  if(!SR){addSys('⚠️ Browser transcription requires Chrome. Configure a backend server for mobile support.');return;}
-  const url=URL.createObjectURL(file);const audio=new Audio(url);audio.crossOrigin='anonymous';
-  const AC=new(window.AudioContext||window.webkitAudioContext)();
-  const src=AC.createMediaElementSource(audio);S.AN=AC.createAnalyser();S.AN.fftSize=256;
-  src.connect(S.AN);src.connect(AC.destination);S.AC=AC;
-  startWaveEl('#E8943A');
-  addSys('▶ Playing audio for transcription — keep tab active, volume on.');
-  const rec=new SR();rec.continuous=true;rec.interimResults=false;rec.lang=document.getElementById('dialect').value;
-  let n=0;
-  rec.onresult=e=>{for(let i=e.resultIndex;i<e.results.length;i++){if(e.results[i].isFinal){const t=e.results[i][0].transcript.trim();if(t){const isCli=/\b(say|repeat|tell me|what|can you|describe|show|name|count|try)\b/i.test(t);addUtt(t,isCli?'clinician':'client');n++;heuristic(t);}}}};
-  rec.onerror=e=>{if(e.error!=='no-speech')console.warn(e.error);};
-  rec.onend=()=>{if(!audio.ended&&!audio.paused)rec.start();};
-  audio.onplay=()=>rec.start();
-  audio.onended=()=>{rec.stop();stopWave();URL.revokeObjectURL(url);if(n===0){addSys('⚠️ No speech detected. Check volume and use Chrome.');}else{addSys('✓ Done — '+n+' utterances captured.');document.getElementById('abtn').disabled=false;}};
-  audio.onerror=()=>{addSys('⚠️ Could not load file.');stopWave();};
-  audio.play().catch(err=>addSys('⚠️ Playback blocked: '+err.message+'. Click page first.'));
+  }catch(err){addSys('⚠️ Server transcription failed: '+err.message);}
 }
 
 // Transcript UI
