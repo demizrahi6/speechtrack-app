@@ -275,7 +275,7 @@ function addUtt(text,speaker){
   const d=document.createElement('div');
   d.className='utt '+(speaker==='client'?'cl':'cn');
   d.id='utt-'+i;
-  d.innerHTML=`<div class="stag ${speaker==='client'?'cl':'cn'}">${speaker==='client'?'Client':'Clinician'}</div><div class="bub"><div class="utxt">${esc(text)}</div><div class="umeta">${S.utts[i].ts}${speaker==='client'?' <button class="edit-btn" onclick="addNote('+i+')">✏️ note error</button>':''}</div><div id="note-${i}"></div></div>`;
+  d.innerHTML=`<div class="stag ${speaker==='client'?'cl':'cn'}" id="stag-${i}" onclick="swapSpeaker(${i})" style="cursor:pointer" title="Click to switch Client/Clinician">${speaker==='client'?'Client':'Clinician'}</div><div class="bub"><div class="utxt">${esc(text)}</div><div class="umeta">${S.utts[i].ts}${speaker==='client'?' <button class="edit-btn" onclick="addNote('+i+')">✏️ note error</button>':''}</div><div id="note-${i}"></div></div>`;
   ts.appendChild(d);scrollB();
 }
 function addNote(i){
