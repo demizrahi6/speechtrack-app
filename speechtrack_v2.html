@@ -143,6 +143,8 @@ canvas{flex:1;height:40px;border-radius:5px;background:var(--bg);}
     <div class="sl" style="margin-top:4px">Recording</div>
     <div class="timer" id="timer">00:00</div>
     <button class="rbtn" id="rbtn" onclick="toggleRec()"><div class="rdot"></div><span id="rtxt">Start Recording</span></button>
+    <button class="ubtn" onclick="document.getElementById('aup').click()">📁 Upload Audio File</button>
+    <input type="file" id="aup" accept="audio/*,video/mp4" style="display:none" onchange="handleUpload(event);this.value=''"/>
     <div class="sl" style="margin-top:4px">Analysis</div>
     <button class="abtn" id="abtn" onclick="runAnalysis()" disabled>Analyze Speech</button>
     <button class="cbtn" onclick="clearAll()">Clear Session</button>
@@ -244,8 +246,12 @@ async function stopRec(){
   };
 }
 
-// Live recording upload (server transcription only — file upload removed
-// due to unreliable speaker-role detection on pre-recorded audio)
+// Upload
+function handleUpload(e){
+  const file=e.target.files[0];if(!file)return;
+  hideEmpty();addSys('📁 '+file.name+' loaded');
+  uploadToServer(file);
+}
 async function uploadToServer(file){
   addSys('📡 Uploading for transcription…');
   const fd=new FormData();fd.append('audio',file,file.name||'recording.webm');fd.append('dialect',document.getElementById('dialect').value);
